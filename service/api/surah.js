@@ -1,4 +1,4 @@
-var QuranApi = require('../shared/quranapi'),
+var QuranService = require('../shared/quranservice'),
     log = console.log;
     
 exports.register = function (api) {
@@ -8,7 +8,7 @@ exports.register = function (api) {
 exports.get = getSurah;
 
 function getSurah(req, res) {
-    new QuranApi().getSurahs(req.params.surah, function(err, surahs) {
+    new QuranService.get(req).getSurahs(req.params.surah, function(err, surahs) {
         if (err) {
             log('Error calling api: ', err);
             res.send(statusCodes.BAD_REQUEST, err);

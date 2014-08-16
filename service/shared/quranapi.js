@@ -15,10 +15,10 @@ var QuranApi = (function(){
         } 
         
         self.proxy(uri, function(err, verses) {
-            if (!err) {
-                verses.forEach(self.transformVerse);
-            }
-            callback(err, verses);
+            if (err) return callback(err);
+            
+            verses.forEach(self.transformVerse);
+            callback(null, verses);
         });
     }
     
@@ -29,10 +29,10 @@ var QuranApi = (function(){
         var uri = this.host + '/info/surah/' + surah;        
         
         this.proxy(uri, function (err, surahs) {
-            if (!err) {
-                surahs.forEach(self.transformSurah);
-            }
-            callback(err, surahs);
+            if (err) return callback(err);
+            
+            surahs.forEach(self.transformSurah);
+            callback(null, surahs);
         });
     };
     

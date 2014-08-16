@@ -11,7 +11,7 @@ exports.get = listTags;
 exports.post = annotate;
 
 function listAnnotations(req, res) {
-    var service = new QuranService(req.service.tables);
+    var service = QuranService.get(req);
     service.listAnnotations(req.params.tag, function(err, verses) {
         if (err) {
             res.send(statusCodes.BAD_REQUEST, err);
@@ -22,23 +22,23 @@ function listAnnotations(req, res) {
 }
 
 function annotate(req, res) {
-    new QuranService(req.service.tables).annotate(req.body.tag, req.body.surah, req.body.verse,function (err) {
+     QuranService.get(req).annotate(req.body.tag, req.body.surah, req.body.verse, function (err) {
         if (err) {
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
         res.send(statusCodes.OK, true);
     });           
-};
+}
 
 function listTags(req, res) {    
     var page = parseInt(req.query.p);
     var size = parseInt(req.query.n);
-    new QuranService(req.service.tables).listTags(page, size, function(err, tags) {
+    QuranService.get(req).listTags(page, size, function(err, tags) {
         if (err) {
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
         res.send(statusCodes.OK, tags);
     });
-};
+}
