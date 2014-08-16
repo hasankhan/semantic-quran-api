@@ -5,10 +5,24 @@ exports.register = function (api) {
     api.get('/', listTags);
     api.get('/:tag', listVerses);
     api.post('/', annotate);
+    api.del('/:tag/:surah/:verse', deannotate);
 }
 
 exports.get = listTags;
 exports.post = annotate;
+
+function deannotate(req, res) {
+    var service = QuranService.get(req);
+    var surah = parseInt(req.params.surah);
+    var verse = parseInt(req.params.verse);
+    service.deannotate(req.params.tag, surah, verse, function (err) {
+        if (err) {
+            res.send(statusCodes.BAD_REQUEST, err);
+            return;
+        }
+        res.send(statusCodes.NO_CONTENT, true);
+    });
+}
 
 function listVerses(req, res) {
     var service = QuranService.get(req);

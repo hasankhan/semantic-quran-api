@@ -40,6 +40,21 @@ var QuranService = (function(){
         });
     };      
     
+    QuranService.prototype.deannotate = function (text, surah, verse, callback) {
+        var self = this;
+        
+        self.findTag(text, function(tag) {
+            if (!tag) return callback();
+            
+            self.mssql.query('delete from annotations where surah = ? and verse = ? and tagId = ?',
+                        [surah, verse, tag.id],
+                        {
+                            success: callback,
+                            error: callback
+                        });
+        });
+    };
+    
     QuranService.prototype.annotate = function(text, surah, verse, callback) {
         var self = this;
             
@@ -71,9 +86,7 @@ var QuranService = (function(){
         var self = this;
         
         self.findTag(tag, function (tag) {
-            if (!tag) {
-                callback(null, []);
-            }
+            if (!tag) return callback(null, []);
             
             self.annotations.where({tagId: tag.id})
                             .orderBy('surah', 'verse')
