@@ -3,14 +3,14 @@ var QuranService = require('../shared/quranservice'),
 
 exports.register = function (api) {
     api.get('/', listTags);
-    api.get('/:tag', listAnnotations);
+    api.get('/:tag', listVerses);
     api.post('/', annotate);
 }
 
 exports.get = listTags;
 exports.post = annotate;
 
-function listAnnotations(req, res) {
+function listVerses(req, res) {
     var service = QuranService.get(req);
     service.listAnnotations(req.params.tag, function(err, verses) {
         if (err) {

@@ -36,7 +36,7 @@ var QuranService = (function(){
         self.api.getVerses(verse.surah, verse.verse, function(err, verses) {
             if (err) return callback(err);
             
-            async.map(verses, self._transformVerse.bind(self), callback);
+            self._transformVerse(verses[0], callback);
         });
     };      
     
