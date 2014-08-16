@@ -95,7 +95,8 @@ var QuranService = (function(){
     };
     
     QuranService.prototype.listAnnotations = function(tag, callback) {
-        var self = this;
+        var self = this,
+            tag = this._normalizeTag(tag);
         
         self.findTag(tag, function (tag) {
             if (!tag) return callback(null, []);
@@ -179,6 +180,7 @@ var QuranService = (function(){
     
     QuranService.prototype._normalizeTag = function(tag) {
         tag = tag.toLowerCase()
+                 .trim()
                  .replace(/[^\w ]/g, '')
                  .replace(/ +/g, '-')
                  .replace('allah', 'Allah');
