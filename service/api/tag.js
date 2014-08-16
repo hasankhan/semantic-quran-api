@@ -23,12 +23,12 @@ function listVerses(req, res) {
 }
 
 function annotate(req, res) {
-     QuranService.get(req).annotate(req.body.tag, req.body.surah, req.body.verse, function (err) {
+     QuranService.get(req).annotate(req.body.tag, req.body.surah, req.body.verse, function (err, tag) {
         if (err) {
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
-        res.send(statusCodes.OK, true);
+        res.send(statusCodes.OK, tag);
     });           
 }
 

@@ -60,14 +60,24 @@ var QuranService = (function(){
         var self = this,
             text = self._normalizeTag(text);
             
+        function addAnnotation(tagId) {
+            self.addAnnotation(surah, verse, tagId, function(err) {
+                if (err) return callback(err);
+                
+                callback(null, text);
+            });
+        }
+            
         self.findTag(text, function(tag){   
             if (!tag) {
-                self.addTag(text, function(tag) {
-                    self.addAnnotation(surah, verse, tag.id, callback);
+                self.addTag(text, function(err, tag) {
+                    if (err) return callback(err);
+                    
+                    addAnnotation(tag.id);
                 });
                 return;
             }
-            self.addAnnotation(surah, verse, tag.id, callback);
+            addAnnotation(tag.id);
         });    
     };
     
@@ -115,19 +125,17 @@ var QuranService = (function(){
                 });
     };
     
-    QuranService.prototype.addAnnotation = function(surah, verse, tag, callback) {
-        this.annotations.insert({
-                                 surah: surah,
-                                 verse: verse,
-                                 tagId: tag   
-                                }, { 
-                                    success: function() {
-                                        callback();
-                                    },
-                                    error: function (err) {
-                                        callback(err);
-                                   }
-                                });                           
+    QuranService.prototype.addAnnotation = function(surah, verse, tagId, callback) {
+        this.mssql.query('if not exists (select 1 from annotations where surah=? and verse=? and tagId=?) insert into annotations (tagId, surah, verse) values (?, ?, ?)',
+                        [surah, verse, tagId, tagId, surah, verse],
+                        { 
+                            success: function() {
+                                callback();
+                            },
+                            error: function (err) {
+                                callback(err);
+                           }
+                        });                           
     };
     
     QuranService.prototype.addTag = function(text, callback) {    
