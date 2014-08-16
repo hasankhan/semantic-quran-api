@@ -38,7 +38,32 @@ var QuranService = (function(){
             
             self._transformVerse(verses[0], callback);
         });
-    };      
+    };         
+    
+    QuranService.prototype.annotate = function(text, surah, verse, callback) {
+        var self = this,
+            text = self._normalizeTag(text);
+            
+        function addAnnotation(tag) {
+            self.addAnnotation(surah, verse, tag.id, function(err) {
+                if (err) return callback(err);
+                
+                callback(null, tag);
+            });
+        }
+            
+        self.findTag(text, function(tag){   
+            if (!tag) {
+                self.addTag(text, function(err, tag) {
+                    if (err) return callback(err);
+                    
+                    addAnnotation(tag);
+                });
+                return;
+            }
+            addAnnotation(tag);
+        });    
+    };
     
     QuranService.prototype.deannotate = function (text, surah, verse, callback) {
         var self = this,
@@ -54,31 +79,6 @@ var QuranService = (function(){
                             error: callback
                         });
         });
-    };
-    
-    QuranService.prototype.annotate = function(text, surah, verse, callback) {
-        var self = this,
-            text = self._normalizeTag(text);
-            
-        function addAnnotation(tagId) {
-            self.addAnnotation(surah, verse, tagId, function(err) {
-                if (err) return callback(err);
-                
-                callback(null, text);
-            });
-        }
-            
-        self.findTag(text, function(tag){   
-            if (!tag) {
-                self.addTag(text, function(err, tag) {
-                    if (err) return callback(err);
-                    
-                    addAnnotation(tag.id);
-                });
-                return;
-            }
-            addAnnotation(tag.id);
-        });    
     };
     
     QuranService.prototype._getAnnotations = function(surah, verse, callback) {
@@ -181,8 +181,8 @@ var QuranService = (function(){
     QuranService.prototype._normalizeTag = function(tag) {
         tag = tag.toLowerCase()
                  .trim()
-                 .replace(/[^\w ]/g, '')
-                 .replace(/ +/g, '-')
+                 .replace(/[^\w -]/g, '')
+                 .replace(/[ -]+/g, '-')
                  .replace('allah', 'Allah');
         return tag;
     }
