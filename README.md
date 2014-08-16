@@ -3,6 +3,8 @@ Semantic Quran API
 
 This REST API allows you to tag verses of Holy Quran in order to navigate the Quran by topics.
 
+For web UI for Semantic Quran app http://semantic-quran.azurewebsites.net/
+
 ## End points
 
 To annotate a verse of quran send a request as follows:
@@ -12,6 +14,11 @@ To annotate a verse of quran send a request as follows:
     body: {tag: name-of-Allah,
             surah: 1, 
             verse: 2}
+
+To deannotate a verse of quran send a request as follows:
+
+    url: http://semantic-quran.azure-mobile.net/api/tag/1/2
+    method: DEL
 
 To get a list of tags:
 
@@ -37,4 +44,3 @@ To get verses of surah:
 
     url: http://semantic-quran.azure-mobile.net/api/verse/1/1-7
     method: GET
-    
