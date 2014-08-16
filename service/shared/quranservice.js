@@ -41,7 +41,8 @@ var QuranService = (function(){
     };      
     
     QuranService.prototype.deannotate = function (text, surah, verse, callback) {
-        var self = this;
+        var self = this,
+            text = self._normalizeTag(text);
         
         self.findTag(text, function(tag) {
             if (!tag) return callback();
@@ -56,7 +57,8 @@ var QuranService = (function(){
     };
     
     QuranService.prototype.annotate = function(text, surah, verse, callback) {
-        var self = this;
+        var self = this,
+            text = self._normalizeTag(text);
             
         self.findTag(text, function(tag){   
             if (!tag) {
@@ -166,6 +168,14 @@ var QuranService = (function(){
             callback(null, verse);
         });
     };
+    
+    QuranService.prototype._normalizeTag = function(tag) {
+        tag = tag.toLowerCase()
+                 .replace(/[^\w ]/g, '')
+                 .replace(/ +/g, '-')
+                 .replace('allah', 'Allah');
+        return tag;
+    }
        
     return QuranService;
 })();
