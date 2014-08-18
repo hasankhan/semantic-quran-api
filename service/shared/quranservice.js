@@ -157,6 +157,7 @@ var QuranService = (function(){
         var offset = size*page;
         this.tags
            .select('text')
+           .orderByDescending('createdAt')
            .skip(offset)
            .take(size)
            .read({
