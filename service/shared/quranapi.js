@@ -14,6 +14,9 @@ var QuranApi = (function(){
           uri += '/' + range;  
         } 
         
+        // use Sahih International translation
+        uri += '?content=214'
+        
         self.proxy(uri, function(err, verses) {
             if (err) return callback(err);
             
