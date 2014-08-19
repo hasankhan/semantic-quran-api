@@ -52,7 +52,9 @@ var QuranService = (function(){
             });
         }
             
-        self.findTag(text, function(tag){   
+        self.findTag(text, function(err, tag){   
+            if (err) return callback(err);
+            
             if (!tag) {
                 self.addTag(text, function(err, tag) {
                     if (err) return callback(err);
@@ -69,13 +71,15 @@ var QuranService = (function(){
         var self = this,
             text = self._normalizeTag(text);
         
-        self.findTag(text, function(tag) {
-            if (!tag) return callback();
+        self.findTag(text, function(err, tag) {
+            if (err || !tag) return callback(err, tag);
             
             self.mssql.query('delete from annotations where surah = ? and verse = ? and tagId = ?',
                         [surah, verse, tag.id],
                         {
-                            success: callback,
+                            success: function() {
+                                callback();
+                            },
                             error: callback
                         });
         });
@@ -98,7 +102,8 @@ var QuranService = (function(){
         var self = this,
             tag = this._normalizeTag(tag);
         
-        self.findTag(tag, function (tag) {
+        self.findTag(tag, function (err, tag) {
+            if (err) return callback(err);
             if (!tag) return callback(null, []);
             
             self.annotations.where({tagId: tag.id})
@@ -118,7 +123,7 @@ var QuranService = (function(){
                 .read({ 
                         success: function(tags) {
                             var tag = tags[0];
-                            callback(tag);      
+                            callback(null, tag);      
                         },
                        error: function (err) {
                             callback(err);

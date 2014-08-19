@@ -15,6 +15,7 @@ function listVerses(req, res) {
     var service = QuranService.get(req);
     service.listAnnotations(req.params.tag, function(err, verses) {
         if (err) {
+            console.log(err);
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
@@ -25,6 +26,7 @@ function listVerses(req, res) {
 function annotate(req, res) {
      QuranService.get(req).annotate(req.body.tag, req.body.surah, req.body.verse, function (err, tag) {
         if (err) {
+            console.log(err);
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
@@ -38,6 +40,7 @@ function deannotate(req, res) {
     var verse = parseInt(req.params.verse);
     service.deannotate(req.params.tag, surah, verse, function (err) {
         if (err) {
+            console.log(err);
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
@@ -50,6 +53,7 @@ function listTags(req, res) {
     var size = parseInt(req.query.n);
     QuranService.get(req).listTags(page, size, function(err, tags) {
         if (err) {
+            console.log(err);
             res.send(statusCodes.BAD_REQUEST, err);
             return;
         }
