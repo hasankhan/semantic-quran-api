@@ -14,11 +14,13 @@
             "permission":"admin"
          },
          "delete":{  
-            "permission":"public"
+            "permission":"admin"
          }
       },
 	  "/:tag/:surah/:verse": {
-		"permission": "authenticated"
+		"delete": {
+			"permission": "authenticated"
+		}
 	  }
    }
 }
