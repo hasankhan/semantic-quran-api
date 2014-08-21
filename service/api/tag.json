@@ -16,6 +16,9 @@
          "delete":{  
             "permission":"public"
          }
-      }
+      },
+	  "/:tag/:surah/:verse": {
+		"permission": "authenticated"
+	  }
    }
 }
