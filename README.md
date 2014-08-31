@@ -3,7 +3,7 @@ Semantic Quran API
 
 This REST API allows you to tag verses of Holy Quran in order to navigate the Quran by topics.
 
-For web UI for Semantic Quran app http://semantic-quran.azurewebsites.net/
+The source for web UI of [Semantic Quran](http://semquran.com) is at http://github.com/hasankhan/semantic-quran-web
 
 ## End points
 
