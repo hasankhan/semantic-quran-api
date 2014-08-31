@@ -44,6 +44,10 @@ var QuranService = (function(){
         var self = this,
             text = self._normalizeTag(text);
             
+        if (text.length < 3 || text.length > 15) {
+            callback(new Error('tag must be between 3 and 15 characters in length.'));
+        }
+
         function addAnnotation(tag) {
             self.addAnnotation(surah, verse, tag.id, function(err) {
                 if (err) return callback(err);
