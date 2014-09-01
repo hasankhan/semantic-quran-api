@@ -1,44 +1,111 @@
 var async = require('async'),
+    _ = require('underscore'),
     QuranApi = require('./quranapi');
     
-var QuranService = (function(){ 
+var QuranService = (function () {
+
+    var Cache = {
+        surahs: {},
+        verses: {},
+
+        getSurah: function (id) {
+            var result = id ? this.surahs[id] || [] : _.sortBy(_.values(this.surahs), 'id');
+            return Array.isArray(result) ? result : [result];
+        },
+
+        getVerses: function (surah, start, end) {            
+            var s = _.first(this.getSurah(surah));
+            if (!s) {
+                console.log('surah not found', surah);
+                return [];
+            }
+
+            end = end || (start ? start : s.verses); // if start specified then end at start otherwise end at last verse
+            start = start || 1;
+
+            var result = this.verses[surah];
+
+            if (!result || // surah is not cached
+                (_.keys(result).length < s.verses)) { // or not enough verses cached
+                return [];
+            }
+
+            result = _.sortBy(_.filter(_.values(result), function (x) { return x.verse >= start && x.verse <= end; }), 'id');
+            return result;
+        }
+    };        
    
     function QuranService(tables, mssql) {        
         this.mssql = mssql;
-        this.surahs = tables.getTable('surahs');
-        this.verses = tables.getTable('verses');
         this.annotations = tables.getTable('annotations');
         this.tags = tables.getTable('tags');
-        this.api = new QuranApi();        
+        this.api = new QuranApi();
     };        
     
     QuranService.get = function (req) {
         return new QuranService(req.service.tables, req.service.mssql);
     };
     
-    QuranService.prototype.getSurahs = function(surah, callback) {
-        this.api.getSurahs(surah, callback);
+    QuranService.prototype.getSurahs = function (surah, callback) {
+        var self = this;
+
+        // first look in the cache
+        var result = Cache.getSurah(surah);
+        if ((surah && result.length == 1) || // if this is surah lookup then there should be single result
+            (!surah && result.length == 114)) { // if this is surah list then there should be total of 114
+            return callback(null, result);
+        }
+
+        console.log('surah not cached', surah);
+
+        // otherwise check the web service
+        this.api.getSurahs(surah, function (err, result) {
+            if (err) return callback(err);
+
+            // cache the surahs
+            result.forEach(function (s) {
+                Cache.surahs[s.id] = s;
+            });
+
+            callback(null, result);
+        });
     };
     
-    QuranService.prototype.getVerses = function(surah, verse, callback) {
-        var self = this;
-        
-        self.api.getVerses(surah, verse, function (err, verses) {
+    QuranService.prototype.getVerses = function(surah, start, end, callback) {
+        var self = this;              
+
+        // first look in the cache
+        var result = Cache.getVerses(surah, start, end);
+        if (result.length > 0) {
+            return callback(null, result);
+        }
+
+        console.log('verses not cached', start, end);
+
+        // otherwise check the web service
+        self.api.getVerses(surah, start, end, function (err, verses) {
             if (err) return callback(err);
+
+            // cache the verses
+            var s = Cache.verses[surah];
+            if (!s) {
+                s = Cache.verses[surah] = {};
+            }
+            verses.forEach(function (v) {
+                s[v.verse] = v;
+            });
 
             async.map(verses, self._transformVerse.bind(self), callback);
         });
     };
-    
-    QuranService.prototype.getVerse = function(verse, callback) {
-        var self = this;
-        
-        self.api.getVerses(verse.surah, verse.verse, function(err, verses) {
+
+    QuranService.prototype.getVerse = function (verse, callback) {
+        this.getVerses(verse.surah, verse.verse, verse.verse, function (err, verses) {
             if (err) return callback(err);
-            
-            self._transformVerse(verses[0], callback);
+
+            callback(null, verses[0]);
         });
-    };         
+    };
     
     QuranService.prototype.annotate = function(text, surah, verse, callback) {
         var self = this,
@@ -81,26 +148,11 @@ var QuranService = (function(){
             self.mssql.query('delete from annotations where surah = ? and verse = ? and tagId = ?',
                         [surah, verse, tag.id],
                         {
-                            success: function() {
-                                callback();
-                            },
+                            success: callback.bind(null, null),
                             error: callback
                         });
         });
-    };
-    
-    QuranService.prototype._getAnnotations = function(surah, verse, callback) {
-        this.mssql.query('select t.text as tag from annotations a join tags t on a.tagId = t.id where a.surah = ? and a.verse = ?',
-                         [surah, verse],
-                         {
-                            success: function (annotations) {
-                                callback(null, annotations.map(function(t){ return t.tag }));
-                            },
-                            error: function(err) {
-                                callback(err);
-                            }
-                         });
-    };
+    };   
     
     QuranService.prototype.listAnnotations = function(tag, callback) {
         var self = this,
@@ -125,13 +177,11 @@ var QuranService = (function(){
         this.tags.where({text: text})
                 .take(1)
                 .read({ 
-                        success: function(tags) {
-                            var tag = tags[0];
-                            callback(null, tag);      
-                        },
-                       error: function (err) {
-                            callback(err);
-                       }
+                    success: function(tags) {
+                        var tag = tags[0];
+                        callback(null, tag);      
+                    },
+                    error: callback
                 });
     };
     
@@ -139,24 +189,16 @@ var QuranService = (function(){
         this.mssql.query('if not exists (select 1 from annotations where surah=? and verse=? and tagId=?) insert into annotations (tagId, surah, verse) values (?, ?, ?)',
                         [surah, verse, tagId, tagId, surah, verse],
                         { 
-                            success: function() {
-                                callback();
-                            },
-                            error: function (err) {
-                                callback(err);
-                           }
+                            success: callback.bind(null, null),
+                            error: callback
                         });                           
     };
     
     QuranService.prototype.addTag = function(text, callback) {    
         var tag = { text: text };
         this.tags.insert(tag, {
-            success: function() {
-                callback(null, tag);
-            },
-           error: function (err) {
-                callback(err);
-           }
+            success: callback.bind(null, null, tag),
+           error: callback
         });
     };
     
@@ -173,10 +215,19 @@ var QuranService = (function(){
                success: function(tags) {
                    callback(null, tags.map(function(t){return t.text; }));
                },
-               error: function (err) {
-                    callback(err);
-               }
+               error: callback
         });
+    };
+
+    QuranService.prototype._getAnnotations = function (surah, verse, callback) {
+        this.mssql.query('select t.text as tag from annotations a join tags t on a.tagId = t.id where a.surah = ? and a.verse = ?',
+                         [surah, verse],
+                         {
+                             success: function (annotations) {
+                                 callback(null, annotations.map(function (t) { return t.tag }));
+                             },
+                             error: callback
+                         });
     };
     
     QuranService.prototype._transformVerse = function(verse, callback) {
@@ -186,7 +237,7 @@ var QuranService = (function(){
             verse.tags = tags;
             callback(null, verse);
         });
-    };
+    };    
     
     QuranService.prototype._normalizeTag = function(tag) {
         tag = tag.toLowerCase()
@@ -195,7 +246,7 @@ var QuranService = (function(){
                  .replace(/[ -]+/g, '-')
                  .replace('allah', 'Allah');
         return tag;
-    }
+    };
        
     return QuranService;
 })();

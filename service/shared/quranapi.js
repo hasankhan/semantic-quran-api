@@ -5,13 +5,18 @@ var QuranApi = (function(){
         this.host = 'http://api.v2.quran.com';
     };
     
-    QuranApi.prototype.getVerses = function(surah, range, callback) {
+    QuranApi.prototype.getVerses = function(surah, start, end, callback) {
         var self = this;
         
-        surah = surah || '';        
+        surah = surah || '';
+
         var uri = self.host + '/bucket/ayat/' + surah;
-        if (range) {
-          uri += '/' + range;  
+
+        if (start) {
+            uri += '/' + start;
+            if (end) {
+                uri += '-' + end;
+            }
         } 
         
         // use Sahih International translation

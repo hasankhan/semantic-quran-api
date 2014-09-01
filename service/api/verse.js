@@ -9,7 +9,11 @@ exports.register = function (api) {
 exports.get = getVerses;
 
 function getVerses(req, res) {
-    new QuranService.get(req).getVerses(req.params.surah, req.params.verse, function(err, verses) {
+    var range = (req.params.verse || '').split('-');
+    var start = range[0],
+        end = range.length > 1 ? range[1] : null;
+
+    new QuranService.get(req).getVerses(req.params.surah, start, end, function(err, verses) {
         if (err) {
             log('Error calling api: ', err);
             res.send(statusCodes.BAD_REQUEST, err);
