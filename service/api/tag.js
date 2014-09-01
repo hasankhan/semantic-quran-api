@@ -4,7 +4,7 @@ var QuranService = require('../shared/quranservice'),
 exports.register = function (api) {
     api.get('/', listTags);
     api.get('/:tag', listVerses);
-    api.post('/', annotate);
+    api.post('/:tag/:surah/:verse', annotate);
     api.del('/:tag/:surah/:verse', deannotate);
 }
 
@@ -24,7 +24,13 @@ function listVerses(req, res) {
 }
 
 function annotate(req, res) {
-     QuranService.get(req).annotate(req.body.tag, req.body.surah, req.body.verse, function (err, tag) {
+    var service = QuranService.get(req);
+
+    var tag = req.params.tag;
+    var surah = parseInt(req.params.surah);
+    var verse = parseInt(req.params.verse);
+
+     service.annotate(tag, surah, verse, function (err, tag) {
         if (err) {
             console.log(err);
             res.send(statusCodes.BAD_REQUEST, err);
@@ -36,9 +42,12 @@ function annotate(req, res) {
 
 function deannotate(req, res) {
     var service = QuranService.get(req);
+
+    var tag = req.params.tag;
     var surah = parseInt(req.params.surah);
     var verse = parseInt(req.params.verse);
-    service.deannotate(req.params.tag, surah, verse, function (err) {
+
+    service.deannotate(tag, surah, verse, function (err) {
         if (err) {
             console.log(err);
             res.send(statusCodes.BAD_REQUEST, err);

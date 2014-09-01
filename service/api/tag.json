@@ -5,7 +5,7 @@
             "permission":"public"
          },
          "post":{  
-            "permission":"public"
+            "permission":"admin"
          },
          "put":{  
             "permission":"admin"
@@ -18,6 +18,9 @@
          }
       },
 	  "/:tag/:surah/:verse": {
+        "post":  {
+            "permission": "authenticated"
+        },
 		"delete": {
 			"permission": "authenticated"
 		}

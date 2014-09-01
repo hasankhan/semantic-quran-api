@@ -9,15 +9,12 @@ The source for web UI of [Semantic Quran](http://semquran.com) is at http://gith
 
 To annotate a verse of quran send a request as follows:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag
-    method: POST
-    body: {tag: name-of-Allah,
-            surah: 1, 
-            verse: 2}
+    url: http://semantic-quran.azure-mobile.net/api/tag/heaven/1/2
+    method: POST    
 
 To deannotate a verse of quran send a request as follows:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag/1/2
+    url: http://semantic-quran.azure-mobile.net/api/tag/heaven/1/2
     method: DEL
 
 To get a list of tags:
@@ -27,7 +24,7 @@ To get a list of tags:
     
 To get a list of verses for a given tag:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag/name-of-Allah
+    url: http://semantic-quran.azure-mobile.net/api/tag/heaven
     method: GET
     
 To get a list of surahs:
