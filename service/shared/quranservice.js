@@ -1,40 +1,9 @@
 var async = require('async'),
     _ = require('underscore'),
-    QuranApi = require('./quranapi');
+    QuranApi = require('./quranapicache');
     
 var QuranService = (function () {
 
-    var Cache = {
-        surahs: {},
-        verses: {},
-
-        getSurah: function (id) {
-            var result = id ? this.surahs[id] || [] : _.sortBy(_.values(this.surahs), 'id');
-            return Array.isArray(result) ? result : [result];
-        },
-
-        getVerses: function (surah, start, end) {            
-            var s = _.first(this.getSurah(surah));
-            if (!s) {
-                console.log('surah not found', surah);
-                return [];
-            }
-
-            end = end || (start ? start : s.verses); // if start specified then end at start otherwise end at last verse
-            start = start || 1;
-
-            var result = this.verses[surah];
-
-            if (!result || // surah is not cached
-                (_.keys(result).length < s.verses)) { // or not enough verses cached
-                return [];
-            }
-
-            result = _.sortBy(_.filter(_.values(result), function (x) { return x.verse >= start && x.verse <= end; }), 'id');
-            return result;
-        }
-    };        
-   
     function QuranService(tables, mssql) {        
         this.mssql = mssql;
         this.annotations = tables.getTable('annotations');
@@ -47,53 +16,14 @@ var QuranService = (function () {
     };
     
     QuranService.prototype.getSurahs = function (surah, callback) {
-        var self = this;
-
-        // first look in the cache
-        var result = Cache.getSurah(surah);
-        if ((surah && result.length == 1) || // if this is surah lookup then there should be single result
-            (!surah && result.length == 114)) { // if this is surah list then there should be total of 114
-            return callback(null, result);
-        }
-
-        console.log('surah not cached', surah);
-
-        // otherwise check the web service
-        this.api.getSurahs(surah, function (err, result) {
-            if (err) return callback(err);
-
-            // cache the surahs
-            result.forEach(function (s) {
-                Cache.surahs[s.id] = s;
-            });
-
-            callback(null, result);
-        });
+        this.api.getSurahs(surah, callback);
     };
     
     QuranService.prototype.getVerses = function(surah, start, end, callback) {
-        var self = this;              
+        var self = this;
 
-        // first look in the cache
-        var result = Cache.getVerses(surah, start, end);
-        if (result.length > 0) {
-            return callback(null, result);
-        }
-
-        console.log('verses not cached', start, end);
-
-        // otherwise check the web service
         self.api.getVerses(surah, start, end, function (err, verses) {
             if (err) return callback(err);
-
-            // cache the verses
-            var s = Cache.verses[surah];
-            if (!s) {
-                s = Cache.verses[surah] = {};
-            }
-            verses.forEach(function (v) {
-                s[v.verse] = v;
-            });
 
             async.map(verses, self._transformVerse.bind(self), callback);
         });
