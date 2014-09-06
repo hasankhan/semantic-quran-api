@@ -70,7 +70,7 @@ var QuranService = (function () {
     
     QuranService.prototype.deannotate = function (text, surah, verse, callback) {
         var self = this,
-            text = self._normalizeTag(text);
+            text = self._normalizeTag(text);            
         
         self.findTag(text, function(err, tag) {
             if (err || !tag) return callback(err, tag);

@@ -46,15 +46,25 @@ function deannotate(req, res) {
     var tag = req.params.tag;
     var surah = parseInt(req.params.surah);
     var verse = parseInt(req.params.verse);
-
-    service.deannotate(tag, surah, verse, function (err) {
-        if (err) {
-            console.log(err);
-            res.send(statusCodes.BAD_REQUEST, err);
-            return;
-        }
-        res.send(statusCodes.NO_CONTENT, true);
-    });
+    
+    var roles = req.service.tables.getTable('roles');
+    roles.where({userId: req.user.id, role: 0})
+        .read({
+            success: function (result) {
+                if (result.length == 0) {
+                    return res.send(statusCodes.UNAUTHORIZED, false);
+                }
+                
+                service.deannotate(tag, surah, verse, function (err) {
+                    if (err) {
+                        console.log(err);
+                        res.send(statusCodes.BAD_REQUEST, err);
+                        return;
+                    }
+                    res.send(statusCodes.NO_CONTENT, true);
+                });
+            }
+        });    
 }
 
 function listTags(req, res) {    
