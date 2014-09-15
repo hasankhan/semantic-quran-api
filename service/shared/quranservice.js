@@ -4,6 +4,8 @@ var async = require('async'),
     
 var QuranService = (function () {
 
+    var TagPattern = /^[a-zA-Z-]{3,25}$/;
+
     function QuranService(tables, mssql) {        
         this.mssql = mssql;
         this.annotations = tables.getTable('annotations');
@@ -41,8 +43,8 @@ var QuranService = (function () {
         var self = this,
             text = self._normalizeTag(text);
             
-        if (text.length < 3 || text.length > 25) {
-            callback(new Error('tag must be between 3 and 25 characters in length.'));
+        if (!TagPattern.test(text)) {
+            return callback(new Error('tag must be between 3 and 25 characters in length.'));
         }
 
         function addAnnotation(tag) {
