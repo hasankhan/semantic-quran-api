@@ -4,40 +4,41 @@ Semantic Quran API
 This REST API allows you to tag verses of Holy Quran in order to navigate the Quran by topics.
 
 The source for web UI of [Semantic Quran](http://semquran.com) is at http://github.com/hasankhan/semantic-quran-web
+The API is hosted at http://semantic-quran.azure-mobile.net
 
 ## End points
 
 To annotate a verse of quran send a request as follows:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag/heaven/1/2
+    url: /api/tag/heaven/1/2
     method: POST    
 
 To deannotate a verse of quran send a request as follows:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag/heaven/1/2
+    url: /api/tag/heaven/1/2
     method: DEL
 
 To get a list of tags:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag
+    url: /api/tag
     method: GET
     
 To get a list of verses for a given tag:
 
-    url: http://semantic-quran.azure-mobile.net/api/tag/heaven
+    url: /api/tag/heaven
     method: GET
     
 To get a list of surahs:
 
-    url: http://semantic-quran.azure-mobile.net/api/surah
+    url: /api/surah
     method: GET
     
 To get details of surah:
 
-    url: http://semantic-quran.azure-mobile.net/api/surah/1
+    url: /api/surah/1
     method: GET
     
 To get verses of surah:
 
-    url: http://semantic-quran.azure-mobile.net/api/verse/1/1-7
+    url: /api/verse/1/1-7
     method: GET
