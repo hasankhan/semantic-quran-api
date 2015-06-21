@@ -55,6 +55,7 @@ var QuranApi = (function(){
     };
     
     QuranApi.prototype.proxy = function (uri, callback) {
+        console.log('proxy: ' + uri);
         http({uri: uri}, function (err, resp, body) {
             body = JSON.parse(body || '');
             if (err || resp.statusCode !== statusCodes.OK) {
