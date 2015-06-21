@@ -13,14 +13,14 @@ var QuranApi = (function(){
         var uri = self.host + '/surahs/' + surah + '/ayat?';
 
         if (start) {
-            uri += 'from=' + start;
+            uri += 'from=' + start + '&';
             if (end) {
-                uri += '&to=' + end;
+                uri += 'to=' + end + '&';
             }
         } 
         
         // use Sahih International translation
-        uri += '?content=19'
+        uri += 'content=19'
         
         self.proxy(uri, function(err, verses) {
             if (err) return callback(err);
