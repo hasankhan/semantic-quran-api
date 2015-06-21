@@ -12,8 +12,14 @@ var QuranService = (function () {
         this.tags = tables.getTable('tags');
         this.api = new QuranApi();
     };        
-    
+                                         
     QuranService.get = function (req) {
+        var mssql = {
+            query: function () {
+                console.log.apply(this, arguments);
+                return req.service.mssql.apply(req.service.mssql, arguments);
+            }
+        }
         return new QuranService(req.service.tables, req.service.mssql);
     };
     
