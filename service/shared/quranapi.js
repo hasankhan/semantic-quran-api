@@ -52,6 +52,9 @@ var QuranApi = (function(){
     QuranApi.prototype.transformVerse = function (verse) {
         verse.verse = verse.ayah;
         delete verse.ayah;
+
+        verse.surah = verse.surah_id;
+        delete verse.surah_id;
     };
     
     QuranApi.prototype.proxy = function (uri, callback) {
