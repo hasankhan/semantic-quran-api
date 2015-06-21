@@ -30,7 +30,7 @@ var QuranService = (function () {
     QuranService.prototype.getVerses = function(surah, start, end, callback) {
         var self = this;
 
-        self.api.getVerses(surah, start, end, function (err, verses) {
+        self.api.getVerses(surah, start, end, function (err, verses) {            
             if (err) return callback(err);
 
             async.map(verses, self._transformVerse.bind(self), callback);
