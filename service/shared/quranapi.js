@@ -2,7 +2,7 @@ var http = require('request');
     
 var QuranApi = (function(){    
     function QuranApi() {        
-        this.host = 'http://api.v2.quran.com';
+        this.host = 'http://45.55.158.85';
     };
     
     QuranApi.prototype.getVerses = function(surah, start, end, callback) {
@@ -10,17 +10,17 @@ var QuranApi = (function(){
         
         surah = surah || '';
 
-        var uri = self.host + '/bucket/ayat/' + surah;
+        var uri = self.host + '/surahs/' + surah + '/ayat?';
 
         if (start) {
-            uri += '/' + start;
+            uri += 'from=' + start;
             if (end) {
-                uri += '-' + end;
+                uri += '&to=' + end;
             }
         } 
         
         // use Sahih International translation
-        uri += '?content=214'
+        uri += '?content=19'
         
         self.proxy(uri, function(err, verses) {
             if (err) return callback(err);
@@ -34,7 +34,7 @@ var QuranApi = (function(){
         var self = this;
         
         surah = surah || '';           
-        var uri = this.host + '/info/surah/' + surah;        
+        var uri = this.host + '/surahs/' + surah;
         
         this.proxy(uri, function (err, surahs) {
             if (err) return callback(err);
